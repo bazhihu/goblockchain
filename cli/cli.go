@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"goblockchain/blockchain"
 	"goblockchain/utils"
-	"log"
 	"os"
 	"runtime"
 	"strconv"
@@ -40,7 +39,7 @@ func (cli *CommandLine) createblockchain(address string) {
 func (cli *CommandLine) balance(address string) {
 	chain := blockchain.ContinueBlockChain()
 	defer chain.Database.Close()
-	log.Fatalln(chain.Database, address)
+
 	balance, err := chain.FindUTXOs([]byte(address))
 
 	fmt.Printf("Address: %s, Balance:%d , err : %x\n", address, balance, err)

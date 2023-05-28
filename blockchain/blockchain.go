@@ -79,7 +79,7 @@ func ContinueBlockChain() *BlockChain {
 	db, err := badger.Open(opts)
 
 	utils.Handle(err)
-	log.Fatalln("-----", err)
+
 	err = db.View(func(txn *badger.Txn) error {
 		// 先取出最新的hash值
 		item, err := txn.Get([]byte(constcoe.LastHashKey))
@@ -92,6 +92,7 @@ func ContinueBlockChain() *BlockChain {
 		utils.Handle(err)
 		return err
 	})
+
 	utils.Handle(err)
 
 	return &BlockChain{lastHash, db}
@@ -161,18 +162,20 @@ func (iterator *BlockChainIterator) Next() *Block {
 // 迭代器终止器
 func (chain *BlockChain) BackOgPrevHash() []byte {
 	var ogprevhash []byte
+
 	err := chain.Database.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(constcoe.BackHashKey))
 		utils.Handle(err)
 
 		err = item.Value(func(val []byte) error {
 			ogprevhash = val
-			return badger.ErrNilCallback
+			return nil
 		})
 
 		utils.Handle(err)
 		return err
 	})
+
 	utils.Handle(err)
 	return ogprevhash
 }
@@ -232,6 +235,7 @@ all:
 
 func (bc *BlockChain) FindUTXOs(address []byte) (int, map[string]int) {
 	unspentOuts := make(map[string]int)
+
 	unspentTxs := bc.FindUnspentTransactions(address)
 	accumulated := 0
 
