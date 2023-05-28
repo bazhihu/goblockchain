@@ -1,7 +1,7 @@
 package main
 
 import (
-	"goblockchain/blockchain/cli"
+	"goblockchain/cli"
 	"os"
 )
 
