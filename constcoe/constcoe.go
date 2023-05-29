@@ -15,4 +15,9 @@ const (
 	BCFile      = "./tmp/blocks/MANIFEST"
 	LastHashKey = "lh"
 	BackHashKey = "ogprevhash"
+
+	ChecksumLength = 4
+	NetworkVersion = byte(0x00)
+	Wallets        = "./tmp/wallets"
+	WalletsRefList = "./tmp/ref_list/"
 )
