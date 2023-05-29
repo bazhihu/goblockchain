@@ -7,7 +7,6 @@ import (
 	"goblockchain/blockchain"
 	"goblockchain/utils"
 	"goblockchain/wallet"
-	"log"
 	"os"
 	"runtime"
 	"strconv"
@@ -47,7 +46,7 @@ func (cli *CommandLine) createblockchain(address string) {
 func (cli *CommandLine) balance(address string) {
 	chain := blockchain.ContinueBlockChain()
 	defer chain.Database.Close()
-	log.Fatalln(chain.Database, address)
+
 	balance, err := chain.FindUTXOs([]byte(address))
 
 	fmt.Printf("Address: %s, Balance:%d , err : %x\n", address, balance, err)
@@ -273,8 +272,13 @@ func (cli *CommandLine) Run() {
 
 	if createBlockChainCmd.Parsed() {
 		if *createBlockChainOwner == "" {
-			createBlockChainCmd.Usage()
-			runtime.Goexit()
+			if *createBlockChainByRefNameOwner == "" {
+				createBlockChainCmd.Usage()
+				runtime.Goexit()
+			} else {
+				cli.createBlockChainRefName(*createBlockChainByRefNameOwner)
+			}
+
 		}
 		cli.createblockchain(*createBlockChainOwner)
 	}
