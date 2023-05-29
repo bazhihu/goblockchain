@@ -247,6 +247,30 @@ func (cli *CommandLine) Run() {
 		runtime.Goexit()
 	}
 
+	if createWalletCmd.Parsed() {
+		cli.createWallet(*createWalletRefName)
+	}
+
+	if walletInfoCmd.Parsed() {
+		if *walletInfoAddress == "" {
+			if *walletInfoRefName == "" {
+				walletInfoCmd.Usage()
+				runtime.Goexit()
+			} else {
+				cli.walletInfoRefName(*walletInfoRefName)
+			}
+		} else {
+			cli.walletInfo(*walletInfoAddress)
+		}
+	}
+
+	if walletsUpdateCmd.Parsed() {
+		cli.walletsUpdate()
+	}
+	if walletsListCmd.Parsed() {
+		cli.walletsList()
+	}
+
 	if createBlockChainCmd.Parsed() {
 		if *createBlockChainOwner == "" {
 			createBlockChainCmd.Usage()
@@ -258,13 +282,26 @@ func (cli *CommandLine) Run() {
 	if balanceCmd.Parsed() {
 
 		if *balanceAddress == "" {
-
-			balanceCmd.Usage()
-			runtime.Goexit()
+			if *balanceRefName == "" {
+				balanceCmd.Usage()
+				runtime.Goexit()
+			} else {
+				cli.balanceRefName(*balanceRefName)
+			}
+		} else {
+			cli.balance(*balanceAddress)
 		}
 
 		cli.balance(*balanceAddress)
 
+	}
+
+	if sendByRefNameCmd.Parsed() {
+		if *sendByRefNameFrom == "" || *sendByRefNameTo == "" || *sendByRefNameAmount <= 0 {
+			sendCmd.Usage()
+			runtime.Goexit()
+		}
+		cli.sendRefName(*sendByRefNameFrom, *sendByRefNameTo, *sendByRefNameAmount)
 	}
 
 	if sendCmd.Parsed() {
