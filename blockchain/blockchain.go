@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"bytes"
+	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
 	"goblockchain/constcoe"
@@ -285,12 +286,12 @@ Work:
 // 打包交易信息
 // 产生一条input信息，
 // 可能两条outputs 信息，一条是给对方得余额，另一条是我方剩余得余额
-func (bc *BlockChain) CreateTransaction(from, to []byte, amount int) (*transaction.Transaction, bool) {
+func (bc *BlockChain) CreateTransaction(from_PubKey, to_HashPubKey []byte, amount int, privkey ecdsa.PrivateKey) (*transaction.Transaction, bool) {
 	var (
 		inputs  []transaction.TxInput
 		outputs []transaction.TxOutput
 	)
-	acc, validOutputs := bc.FindSpendableOutputs(from, amount)
+	acc, validOutputs := bc.FindSpendableOutputs(from_PubKey, amount)
 	if acc < amount {
 		fmt.Println("Not enough coins!")
 		return &transaction.Transaction{}, false
@@ -299,17 +300,19 @@ func (bc *BlockChain) CreateTransaction(from, to []byte, amount int) (*transacti
 	for txid, outidx := range validOutputs {
 		txID, err := hex.DecodeString(txid)
 		utils.Handle(err)
-		input := transaction.TxInput{txID, outidx, from}
+		input := transaction.TxInput{txID, outidx, from_PubKey, nil}
 		inputs = append(inputs, input)
 	}
-	outputs = append(outputs, transaction.TxOutput{amount, to})
+	outputs = append(outputs, transaction.TxOutput{amount, to_HashPubKey})
 	if acc > amount {
 		fmt.Printf("acc > amount %d, %d\n", acc, amount)
-		outputs = append(outputs, transaction.TxOutput{acc - amount, from})
+		outputs = append(outputs, transaction.TxOutput{acc - amount, utils.PublicKeyHash(from_PubKey)})
 	}
 
 	tx := transaction.Transaction{nil, inputs, outputs}
 	tx.SetID()
+
+	tx.Sign(privkey)
 	return &tx, true
 }
 
