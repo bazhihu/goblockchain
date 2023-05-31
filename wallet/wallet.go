@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"encoding/gob"
 	"errors"
+	"fmt"
 	"goblockchain/constcoe"
 	"goblockchain/utils"
 	"io/ioutil"
@@ -36,6 +37,7 @@ type Wallet struct {
 // 创建钱包生成函数
 func NewWallet() *Wallet {
 	privateKey, publicKey := NewKeyPair()
+
 	wallet := Wallet{privateKey, publicKey}
 	return &wallet
 }
@@ -51,9 +53,12 @@ func (w *Wallet) Address() []byte {
 func (w *Wallet) Save() {
 	filename := constcoe.Wallets + string(w.Address()) + ".wlt"
 	var content bytes.Buffer
+
 	gob.Register(elliptic.P256())
+
 	encoding := gob.NewEncoder(&content)
-	err := encoding.Encode(w)
+	err := encoding.Encode(&w)
+	fmt.Println(filename, err)
 	utils.Handle(err)
 	err = ioutil.WriteFile(filename, content.Bytes(), 0644)
 	utils.Handle(err)
