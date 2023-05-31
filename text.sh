@@ -6,7 +6,7 @@ mkdir -p tmp/ref_list
 
 rm main
 
-go build main.go
+go1.18.7 build main.go
 
 ./main createwallet 
 ./main walletslist
