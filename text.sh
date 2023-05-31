@@ -8,19 +8,34 @@ rm main
 
 go build main.go
 
-./main createblockchain -address LeoCao
+./main createwallet 
+./main walletslist
+./main createwallet -refname LeoCao
+./main walletinfo -refname LeoCao
+./main createwallet -refname Krad
+./main createwallet -refname Exia
+./main createwallet 
+./main walletslist
+./main createblockchain -refname LeoCao
 ./main blockchaininfo
-./main balance -address LeoCao
-./main send -from LeoCao -to Krad -amount 100
-./main balance -address Krad
+./main balance -refname LeoCao
+./main sendbyrefname -from LeoCao -to Krad -amount 100
+./main balance -refname Krad
 ./main mine
 ./main blockchaininfo
-./main balance -address LeoCao
-./main balance -address Krad
-./main send -from LeoCao -to Exia -amount 100
-./main send -from Krad -to Exia -amount 30
+./main balance -refname LeoCao
+./main balance -refname Krad
+./main sendbyrefname -from LeoCao -to Exia -amount 100
+./main sendbyrefname -from Krad -to Exia -amount 30
 ./main mine
 ./main blockchaininfo
-./main balance -address LeoCao
-./main balance -address Krad
-./main balance -address Exia
+./main balance -refname LeoCao
+./main balance -refname Krad
+./main balance -refname Exia
+./main sendbyrefname -from Exia -to LeoCao -amount 90
+./main sendbyrefname -from Exia -to Krad -amount 90
+./main mine
+./main blockchaininfo
+./main balance -refname LeoCao
+./main balance -refname Krad
+./main balance -refname Exia

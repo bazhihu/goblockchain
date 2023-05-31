@@ -37,7 +37,7 @@ func (cli *CommandLine) printUsage() {
 
 // 创建一个区块链
 func (cli *CommandLine) createblockchain(address string) {
-	newChain := blockchain.InitBlockChain([]byte(address))
+	newChain := blockchain.InitBlockChain(utils.Address2PubHash([]byte(address)))
 	defer newChain.Database.Close()
 	fmt.Println("Finished creating blockchain, and the owner is:", address)
 }
@@ -47,7 +47,9 @@ func (cli *CommandLine) balance(address string) {
 	chain := blockchain.ContinueBlockChain()
 	defer chain.Database.Close()
 
-	balance, err := chain.FindUTXOs([]byte(address))
+	wlt := wallet.LoadWallet(address)
+
+	balance, err := chain.FindUTXOs(wlt.PublicKey)
 
 	fmt.Printf("Address: %s, Balance:%d , err : %x\n", address, balance, err)
 }
@@ -80,7 +82,9 @@ func (cli *CommandLine) getBlockChainInfo() {
 func (cli *CommandLine) send(from, to string, amount int) {
 	chain := blockchain.ContinueBlockChain()
 	defer chain.Database.Close()
-	tx, ok := chain.CreateTransaction([]byte(from), []byte(to), amount)
+
+	fromWallet := wallet.LoadWallet(from)
+	tx, ok := chain.CreateTransaction(fromWallet.PublicKey, utils.Address2PubHash([]byte(to)), amount, fromWallet.PrivateKey)
 	if !ok {
 		fmt.Println("Failed to create transaction")
 		return
