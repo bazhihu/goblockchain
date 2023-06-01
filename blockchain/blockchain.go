@@ -99,6 +99,28 @@ func ContinueBlockChain() *BlockChain {
 	return &BlockChain{lastHash, db}
 }
 
+func (bc *BlockChain) GetCurrentBlock() *Block {
+	var block *Block
+	err := bc.Database.View(func(txn *badger.Txn) error {
+		item, err := txn.Get(bc.LastHash)
+		utils.Handle(err)
+
+		err = item.Value(func(val []byte) error {
+			block = block.DeSerializeBlock(val)
+			return nil
+		})
+		utils.Handle(err)
+		return err
+	})
+	utils.Handle(err)
+	return block
+}
+
+// 获取区块的高度
+func (bc *BlockChain) BackHeight() int64 {
+	return bc.GetCurrentBlock().Height
+}
+
 func (bc *BlockChain) AddBlock(newBlock *Block) {
 	// newBlock := CreateBlock(bc.Blocks[len(bc.Blocks)-1].Hash, txs)
 	// bc.Blocks = append(bc.Blocks, newBlock)
@@ -232,6 +254,21 @@ all:
 	}
 
 	return unSpentTxs
+}
+
+func (bc *BlockChain) BackUTXOs(address []byte) []transaction.UTXO {
+	var UTXOs []transaction.UTXO
+	unspentTxs := bc.FindUnspentTransactions(address)
+Work:
+	for _, tx := range unspentTxs {
+		for outIdx, out := range tx.Outputs {
+			if out.ToAddressRight(address) {
+				UTXOs = append(UTXOs, transaction.UTXO{tx.ID, outIdx, out})
+				continue Work
+			}
+		}
+	}
+	return UTXOs
 }
 
 func (bc *BlockChain) FindUTXOs(address []byte) (int, map[string]int) {

@@ -20,7 +20,7 @@ func (bc *BlockChain) RunMine() {
 		return
 	}
 
-	candidateBlock := CreateBlock(bc.LastHash, transactionPool.PubTx)
+	candidateBlock := CreateBlock(bc.LastHash, bc.BackHeight()+1, transactionPool.PubTx)
 	if candidateBlock.ValidatePoW() {
 		bc.AddBlock(candidateBlock)
 

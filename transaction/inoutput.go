@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"bytes"
+	"encoding/gob"
 	"goblockchain/utils"
 )
 
@@ -34,3 +35,28 @@ func (out *TxOutput) ToAddressRight(address []byte) bool {
 // P2PK pay to public key
 // 主流区块链系统 用公钥表征Input的地址，用公钥哈希表征Output的地址
 // output 使用公钥哈希 能进一步提升区块链系统中交易的匿名性
+
+// 包含output的所有信息
+type UTXO struct {
+	TxID   []byte
+	OutIdx int
+	TxOutput
+}
+
+// UTXO序列化
+func (u *UTXO) Serialize() []byte {
+	var res bytes.Buffer
+	enCoder := gob.NewEncoder(&res)
+	err := enCoder.Encode(u)
+	utils.Handle(err)
+	return res.Bytes()
+}
+
+// UTXO反序列化
+func (u *UTXO) DeserializeUTXO(data []byte) *UTXO {
+	var utxo UTXO
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	err := decoder.Decode(&utxo)
+	utils.Handle(err)
+	return &utxo
+}
