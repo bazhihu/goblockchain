@@ -3,6 +3,7 @@ rm -rf tmp
 mkdir -p tmp/blocks
 mkdir -p tmp/wallets
 mkdir -p tmp/ref_list
+mkdir -p tmp/ref_list
 
 rm main
 
@@ -18,6 +19,7 @@ go1.18.7 build main.go
 ./main walletslist
 ./main createblockchain -refname LeoCao
 ./main blockchaininfo
+./main initutxoset
 ./main balance -refname LeoCao
 ./main sendbyrefname -from LeoCao -to Krad -amount 100
 ./main balance -refname Krad
