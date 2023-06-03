@@ -44,15 +44,21 @@ func (cli *CommandLine) createblockchain(address string) {
 
 // 查看钱包
 func (cli *CommandLine) balance(address string) {
-	chain := blockchain.ContinueBlockChain()
-	defer chain.Database.Close()
-
 	wlt := wallet.LoadWallet(address)
-
-	balance, err := chain.FindUTXOs(wlt.PublicKey)
-
-	fmt.Printf("Address: %s, Balance:%d , err : %x\n", address, balance, err)
+	balance := wlt.GetBalance()
+	fmt.Printf("Address: %s, Balance: %d \n", address, balance)
 }
+
+// func (cli *CommandLine) balance(address string) {
+// 	chain := blockchain.ContinueBlockChain()
+// 	defer chain.Database.Close()
+
+// 	wlt := wallet.LoadWallet(address)
+
+// 	balance, err := chain.FindUTXOs(wlt.PublicKey)
+
+// 	fmt.Printf("Address: %s, Balance:%d , err : %x\n", address, balance, err)
+// }
 
 // 遍历区块的交易信息
 func (cli *CommandLine) getBlockChainInfo() {
@@ -100,6 +106,14 @@ func (cli *CommandLine) mine() {
 	defer chain.Database.Close()
 	chain.RunMine()
 	fmt.Println("Finish Mining")
+
+	newBlock := chain.GetCurrentBlock()
+	refList := wallet.LoadRefList()
+	for k, _ := range *refList {
+		wlt := wallet.LoadWallet(k)
+		wlt.ScanBlock(newBlock)
+	}
+	fmt.Println("Finish Updating UTXO sets")
 }
 
 // 创建钱包
@@ -327,4 +341,17 @@ func (cli *CommandLine) Run() {
 		cli.mine()
 	}
 
+}
+
+func (cli *CommandLine) iniUtxoSet() {
+	chain := blockchain.ContinueBlockChain()
+	defer chain.Database.Close()
+
+	refList := wallet.LoadRefList()
+	for addr, _ := range *refList {
+		wlt := wallet.LoadWallet(addr)
+		utxoSet := wlt.CreateUTXOSet(chain)
+		utxoSet.DB.Close()
+	}
+	fmt.Println("Success in initializing UTXO sets.")
 }

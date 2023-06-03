@@ -60,3 +60,11 @@ func (u *UTXO) DeserializeUTXO(data []byte) *UTXO {
 	utils.Handle(err)
 	return &utxo
 }
+
+func DeserializeUTXO(data []byte) *UTXO {
+	var utxo UTXO
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	err := decoder.Decode(&utxo)
+	utils.Handle(err)
+	return &utxo
+}
